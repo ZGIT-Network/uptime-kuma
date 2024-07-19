@@ -10,7 +10,7 @@ class SMTP extends NotificationProvider {
      * @inheritdoc
      */
     async send(notification, msg, monitorJSON = null, heartbeatJSON = null) {
-        const okMsg = "Sent Successfully.";
+        const okMsg = "发送成功";
 
         const config = {
             host: notification.smtpHost,
@@ -45,10 +45,10 @@ class SMTP extends NotificationProvider {
         let subject = msg;
         let body = msg;
         if (heartbeatJSON) {
-            body = `${msg}\nTime (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`;
+            body = `${msg}\n时间戳 (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`;
         }
         // subject and body are templated
-        if ((monitorJSON && heartbeatJSON) || msg.endsWith("Testing")) {
+        if ((monitorJSON && heartbeatJSON) || msg.endsWith("测试邮件|测试中...")) {
             // cannot end with whitespace as this often raises spam scores
             const customSubject = notification.customSubject?.trim() || "";
             const customBody = notification.customBody?.trim() || "";
@@ -98,7 +98,7 @@ class SMTP extends NotificationProvider {
 
         let serviceStatus = "⚠️ Test";
         if (heartbeatJSON !== null) {
-            serviceStatus = (heartbeatJSON["status"] === DOWN) ? "🔴 Down" : "✅ Up";
+            serviceStatus = (heartbeatJSON["status"] === DOWN) ? "🔴 异常/离线" : "✅ 已恢复";
         }
         return {
             // for v1 compatibility, to be removed in v3

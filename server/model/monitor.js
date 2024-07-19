@@ -391,7 +391,7 @@ class Monitor extends BeanModel {
 
                     if (children.length > 0) {
                         bean.status = UP;
-                        bean.msg = "All children up and running";
+                        bean.msg = "所有子项目正常运行";
                         for (const child of children) {
                             if (!child.active) {
                                 // Ignore inactive childs
@@ -411,12 +411,12 @@ class Monitor extends BeanModel {
                         }
 
                         if (bean.status !== UP) {
-                            bean.msg = "Child inaccessible";
+                            bean.msg = "子项目离线";
                         }
                     } else {
                         // Set status pending if group is empty
                         bean.status = PENDING;
-                        bean.msg = "Group empty";
+                        bean.msg = "空组";
                     }
 
                 } else if (this.type === "http" || this.type === "keyword" || this.type === "json-query") {

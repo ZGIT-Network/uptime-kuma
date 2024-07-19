@@ -8,7 +8,7 @@ class Telegram extends NotificationProvider {
      * @inheritdoc
      */
     async send(notification, msg, monitorJSON = null, heartbeatJSON = null) {
-        const okMsg = "Sent Successfully.";
+        const okMsg = "发送成功";
         const url = "https://api.telegram.org";
 
         try {

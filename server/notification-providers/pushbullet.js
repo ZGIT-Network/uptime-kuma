@@ -30,19 +30,19 @@ class Pushbullet extends NotificationProvider {
             } else if (heartbeatJSON["status"] === DOWN) {
                 let downData = {
                     "type": "note",
-                    "title": "UptimeKuma Alert: " + monitorJSON["name"],
-                    "body": "[🔴 Down] " +
+                    "title": "ZGIT Network 业务状态告警: " + monitorJSON["name"],
+                    "body": "[🔴 异常/离线] " +
                         heartbeatJSON["msg"] +
-                        `\nTime (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`,
+                        `\n时间戳 (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`,
                 };
                 await axios.post(url, downData, config);
             } else if (heartbeatJSON["status"] === UP) {
                 let upData = {
                     "type": "note",
-                    "title": "UptimeKuma Alert: " + monitorJSON["name"],
-                    "body": "[✅ Up] " +
+                    "title": "ZGIT Network 业务状态告警: " + monitorJSON["name"],
+                    "body": "[✅ 已恢复] " +
                         heartbeatJSON["msg"] +
-                        `\nTime (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`,
+                        `\n时间戳 (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`,
                 };
                 await axios.post(url, upData, config);
             }

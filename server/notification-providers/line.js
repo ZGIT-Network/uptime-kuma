@@ -36,10 +36,10 @@ class Line extends NotificationProvider {
                     "messages": [
                         {
                             "type": "text",
-                            "text": "UptimeKuma Alert: [🔴 Down]\n" +
-                                "Name: " + monitorJSON["name"] + " \n" +
+                            "text": "ZGIT Network 业务状态告警: [🔴 异常/离线]\n" +
+                                "[" + monitorJSON["name"] + "] \n" +
                                 heartbeatJSON["msg"] +
-                                `\nTime (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`
+                                `\n时间戳 (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`
                         }
                     ]
                 };
@@ -50,10 +50,10 @@ class Line extends NotificationProvider {
                     "messages": [
                         {
                             "type": "text",
-                            "text": "UptimeKuma Alert: [✅ Up]\n" +
-                                "Name: " + monitorJSON["name"] + " \n" +
+                            "text": "ZGIT Network 业务状态通知: [✅ 已恢复]\n" +
+                                "[" + monitorJSON["name"] + "] \n" +
                                 heartbeatJSON["msg"] +
-                                `\nTime (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`
+                                `\n时间戳 (${heartbeatJSON["timezone"]}): ${heartbeatJSON["localDateTime"]}`
                         }
                     ]
                 };

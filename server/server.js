@@ -3,7 +3,7 @@
  * node "server/server.js"
  * DO NOT require("./server") in other modules, it likely creates circular dependency!
  */
-console.log("Welcome to Uptime Kuma");
+console.log("欢迎使用 Uptime Kuma");
 
 // As the log function need to use dayjs, it should be very top
 const dayjs = require("dayjs");
@@ -20,7 +20,7 @@ const nodeVersion = process.versions.node;
 // Get the required Node.js version from package.json
 const requiredNodeVersions = require("../package.json").engines.node;
 const bannedNodeVersions = " < 14 || 20.0.* || 20.1.* || 20.2.* || 20.3.* ";
-console.log(`Your Node.js version: ${nodeVersion}`);
+console.log(`您的 Node.js 版本: ${nodeVersion}`);
 
 const semver = require("semver");
 const requiredNodeVersionsComma = requiredNodeVersions.split("||").map((version) => version.trim()).join(", ");
@@ -51,7 +51,7 @@ if (!process.env.UPTIME_KUMA_WS_ORIGIN_CHECK) {
     process.env.UPTIME_KUMA_WS_ORIGIN_CHECK = "cors-like";
 }
 
-log.info("server", "Env: " + process.env.NODE_ENV);
+log.info("server", "模式: " + process.env.NODE_ENV);
 log.debug("server", "Inside Container: " + (process.env.UPTIME_KUMA_IS_CONTAINER === "1"));
 
 if (process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass") {
