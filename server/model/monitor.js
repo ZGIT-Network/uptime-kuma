@@ -1306,6 +1306,18 @@ class Monitor extends BeanModel {
      * @param {Bean} bean Status information about monitor
      * @returns {void}
      */
+    static async maskIPv4Address(str) {
+        // 正则表达式匹配 IPv4 地址和端口号
+        const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
+
+        // 替换 IPv4 地址中的最后两部分为 xxx，并移除端口号
+        return str.replace(ipv4Regex, (match) => {
+            const ipv4Address = match.split(':')[0]; // 提取 IPv4 地址
+            const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx'); // 隐藏最后两部分
+            return maskedAddress;
+        });
+    }
+
     static async sendNotification(isFirstBeat, monitor, bean) {
         if (!isFirstBeat || bean.status === DOWN) {
             const notificationList = await Monitor.getNotificationList(monitor);
@@ -1318,18 +1330,6 @@ class Monitor extends BeanModel {
             } else {
                 text = "🔴 异常/离线";
                 ErrorMessage = `异常信息: ${bean.msg}`;
-            }
-
-            function maskIPv4Address(str) {
-                // 正则表达式匹配 IPv4 地址和端口号
-                const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
-
-                // 替换 IPv4 地址中的最后两部分为 xxx，并移除端口号
-                return str.replace(ipv4Regex, (match) => {
-                    const ipv4Address = match.split(':')[0]; // 提取 IPv4 地址
-                    const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx'); // 隐藏最后两部分
-                    return maskedAddress;
-                });
             }
 
             let msg = `[${monitor.name}] \n${maskIPv4Address(ErrorMessage)} \n系统监测状态: ${text} \n时间戳: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`;
