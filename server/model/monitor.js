@@ -1316,21 +1316,20 @@ class Monitor extends BeanModel {
             let ErrorMessage;
             if (bean.status === 'UP') {
                 text = "✅ 已恢复";
-                ErrorMessage = `返回信息: ${bean.msg}`;
+                ErrorMessage = `返回信息: ${bean.msg || "N/A"}`;
             } else {
-                function maskIPv4Address(str) {
-                    if (!str) return "N/A";
-                    const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
-                    return str.replace(ipv4Regex, (match) => {
-                        const ipv4Address = match.split(':')[0];
-                        const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx');
-                        return maskedAddress;
-                    });
-                }
+                // function maskIPv4Address(str) {
+                //     if (!str) return "N/A";
+                //     const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
+                //     return str.replace(ipv4Regex, (match) => {
+                //         const ipv4Address = match.split(':')[0];
+                //         const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx');
+                //         return maskedAddress;
+                //     });
+                // }
 
                 text = "🔴 异常/离线";
-                ErrorMessage = `异常信息: ${maskIPv4Address(bean.msg)}`;
-
+                ErrorMessage = `异常信息: ${bean.msg}`;
             }
 
 
