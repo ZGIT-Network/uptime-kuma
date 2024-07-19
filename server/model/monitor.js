@@ -1311,13 +1311,16 @@ class Monitor extends BeanModel {
             const notificationList = await Monitor.getNotificationList(monitor);
 
             let text;
+            let ErrorMessage;
             if (bean.status === UP) {
-                text = "✅ Up";
+                text = "✅ 已恢复";
+                ErrorMessage = `返回信息: ${bean.msg}`;
             } else {
-                text = "🔴 Down";
+                text = "🔴 异常/离线";
+                ErrorMessage = `异常信息: ${bean.msg}`;
             }
 
-            let msg = `[${monitor.name}] [${text}] ${bean.msg}`;
+            let msg = `[${monitor.name}] \n${ErrorMessage} \n系统监测状态 [${text}] \n 时间戳 ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`;
 
             for (let notification of notificationList) {
                 try {
