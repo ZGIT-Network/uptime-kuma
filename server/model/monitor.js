@@ -1319,13 +1319,11 @@ class Monitor extends BeanModel {
                 ErrorMessage = `返回信息: ${bean.msg}`;
             } else {
                 function maskIPv4Address(str) {
-                    // 正则表达式匹配 IPv4 地址和端口号
+                    if (!str) return "N/A";
                     const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
-
-                    // 替换 IPv4 地址中的最后两部分为 xxx，并移除端口号
                     return str.replace(ipv4Regex, (match) => {
-                        const ipv4Address = match.split(':')[0]; // 提取 IPv4 地址
-                        const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx'); // 隐藏最后两部分
+                        const ipv4Address = match.split(':')[0];
+                        const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx');
                         return maskedAddress;
                     });
                 }
