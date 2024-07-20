@@ -39,7 +39,7 @@ let options = {
 };
 
 let request = client.request(options, (res) => {
-    console.log(`Health Check OK [Res Code: ${res.statusCode}]`);
+    console.log(`健康检查成功 [Res Code: ${res.statusCode}]`);
     if (res.statusCode === 302) {
         process.exit(0);
     } else {

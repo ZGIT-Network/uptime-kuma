@@ -3,7 +3,7 @@
  * node "server/server.js"
  * DO NOT require("./server") in other modules, it likely creates circular dependency!
  */
-console.log("欢迎使用 Uptime Kuma");
+console.log("欢迎使用 Uptime Kuma - ZGIT Network 分支");
 
 // As the log function need to use dayjs, it should be very top
 const dayjs = require("dayjs");
@@ -27,13 +27,13 @@ const requiredNodeVersionsComma = requiredNodeVersions.split("||").map((version)
 
 // Exit Uptime Kuma immediately if the Node.js version is banned
 if (semver.satisfies(nodeVersion, bannedNodeVersions)) {
-    console.error("\x1b[31m%s\x1b[0m", `Error: Your Node.js version: ${nodeVersion} is not supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`);
+    console.error("\x1b[31m%s\x1b[0m", `错误: 你的 Node.js 版本: ${nodeVersion} 不受支持, 请立即更新到 ${requiredNodeVersionsComma}.`);
     process.exit(-1);
 }
 
 // Warning if the Node.js version is not in the support list, but it maybe still works
 if (!semver.satisfies(nodeVersion, requiredNodeVersions)) {
-    console.warn("\x1b[31m%s\x1b[0m", `Warning: Your Node.js version: ${nodeVersion} is not officially supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`);
+    console.warn("\x1b[31m%s\x1b[0m", `警告: 你的 Node.js 版本: ${nodeVersion} 将不再受到支持, 请尽快更新你的 Node.js 版本到 ${requiredNodeVersionsComma}.`);
 }
 
 const args = require("args-parser")(process.argv);
@@ -59,11 +59,11 @@ if (process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass") {
 }
 
 const checkVersion = require("./check-version");
-log.info("server", "Uptime Kuma Version: " + checkVersion.version);
+log.info("server", "Uptime Kuma 版本: " + checkVersion.version);
 
-log.info("server", "Loading modules");
+log.info("server", "加载模块");
 
-log.debug("server", "Importing express");
+log.debug("server", "载入 express");
 const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
 log.debug("server", "Importing redbean-node");
@@ -76,7 +76,7 @@ log.debug("server", "Importing prometheus-api-metrics");
 const prometheusAPIMetrics = require("prometheus-api-metrics");
 const { passwordStrength } = require("check-password-strength");
 
-log.debug("server", "Importing 2FA Modules");
+log.debug("server", "加载 2FA 模块");
 const notp = require("notp");
 const base32 = require("thirty-two");
 
@@ -85,22 +85,22 @@ const server = UptimeKumaServer.getInstance();
 const io = module.exports.io = server.io;
 const app = server.app;
 
-log.debug("server", "Importing Monitor");
+log.debug("server", "载入监控器");
 const Monitor = require("./model/monitor");
 const User = require("./model/user");
 
-log.debug("server", "Importing Settings");
+log.debug("server", "加载设置");
 const { getSettings, setSettings, setting, initJWTSecret, checkLogin, doubleCheckPassword, shake256, SHAKE256_LENGTH, allowDevAllOrigin,
 } = require("./util-server");
 
-log.debug("server", "Importing Notification");
+log.debug("server", "载入通知处理");
 const { Notification } = require("./notification");
 Notification.init();
 
-log.debug("server", "Importing Database");
+log.debug("server", "载入数据库");
 const Database = require("./database");
 
-log.debug("server", "Importing Background Jobs");
+log.debug("server", "启动后台工作进程");
 const { initBackgroundJobs, stopBackgroundJobs } = require("./jobs");
 const { loginRateLimiter, twoFaRateLimiter } = require("./rate-limiter");
 
@@ -111,7 +111,7 @@ const passwordHash = require("./password-hash");
 const hostname = config.hostname;
 
 if (hostname) {
-    log.info("server", "Custom hostname: " + hostname);
+    log.info("server", "自定义主机名: " + hostname);
 }
 
 const port = config.port;
@@ -183,7 +183,7 @@ let needSetup = false;
     try {
         await initDatabase(testMode);
     } catch (e) {
-        log.error("server", "Failed to prepare your database: " + e.message);
+        log.error("server", "无法准备数据库链接: " + e.message);
         process.exit(1);
     }
 
@@ -192,7 +192,7 @@ let needSetup = false;
     server.entryPage = await Settings.get("entryPage");
     await StatusPage.loadDomainMappingList();
 
-    log.debug("server", "Adding route");
+    log.debug("server", "启动路由");
 
     // ***************************
     // Normal Router here
@@ -208,7 +208,7 @@ let needSetup = false;
             }
         }
 
-        log.debug("entry", `Request Domain: ${hostname}`);
+        log.debug("entry", `请求域名: ${hostname}`);
 
         const uptimeKumaEntryPage = server.entryPage;
         if (hostname in StatusPage.domainMappingList) {
@@ -292,13 +292,13 @@ let needSetup = false;
         }
     });
 
-    log.debug("server", "Adding socket handler");
+    log.debug("server", "添加 socket 处理器");
     io.on("connection", async (socket) => {
 
         await sendInfo(socket, true);
 
         if (needSetup) {
-            log.info("server", "Redirect to setup page");
+            log.info("server", "需要初始化.重定向到初始化配置");
             socket.emit("setup");
         }
 
@@ -309,12 +309,12 @@ let needSetup = false;
         socket.on("loginByToken", async (token, callback) => {
             const clientIP = await server.getClientIP(socket);
 
-            log.info("auth", `Login by token. IP=${clientIP}`);
+            log.info("auth", `通过密钥登录. IP=${clientIP}`);
 
             try {
                 let decoded = jwt.verify(token, server.jwtSecret);
 
-                log.info("auth", "Username from JWT: " + decoded.username);
+                log.info("auth", "从 JWT 获取用户名: " + decoded.username);
 
                 let user = await R.findOne("user", " username = ? AND active = 1 ", [
                     decoded.username,
@@ -330,14 +330,14 @@ let needSetup = false;
                     await afterLogin(socket, user);
                     log.debug("auth", "afterLogin ok");
 
-                    log.info("auth", `Successfully logged in user ${decoded.username}. IP=${clientIP}`);
+                    log.info("auth", `用户 ${decoded.username} 登录成功. IP=${clientIP}`);
 
                     callback({
                         ok: true,
                     });
                 } else {
 
-                    log.info("auth", `Inactive or deleted user ${decoded.username}. IP=${clientIP}`);
+                    log.info("auth", `非活动用户或已删除用户 ${decoded.username}. IP=${clientIP}`);
 
                     callback({
                         ok: false,
@@ -346,7 +346,7 @@ let needSetup = false;
                     });
                 }
             } catch (error) {
-                log.error("auth", `Invalid token. IP=${clientIP}`);
+                log.error("auth", `未知密钥. IP=${clientIP}`);
                 if (error.message) {
                     log.error("auth", error.message, `IP=${clientIP}`);
                 }
@@ -362,7 +362,7 @@ let needSetup = false;
         socket.on("login", async (data, callback) => {
             const clientIP = await server.getClientIP(socket);
 
-            log.info("auth", `Login by username + password. IP=${clientIP}`);
+            log.info("auth", `通过账号密码登录. IP=${clientIP}`);
 
             // Checking
             if (typeof callback !== "function") {
@@ -375,7 +375,7 @@ let needSetup = false;
 
             // Login Rate Limit
             if (!await loginRateLimiter.pass(callback)) {
-                log.info("auth", `Too many failed requests for user ${data.username}. IP=${clientIP}`);
+                log.info("auth", `用户 ${data.username} 发送过多登录请求. IP=${clientIP}`);
                 return;
             }
 
@@ -385,7 +385,7 @@ let needSetup = false;
                 if (user.twofa_status === 0) {
                     await afterLogin(socket, user);
 
-                    log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
+                    log.info("auth", `用户 ${data.username} 登录成功. IP=${clientIP}`);
 
                     callback({
                         ok: true,
@@ -395,7 +395,7 @@ let needSetup = false;
 
                 if (user.twofa_status === 1 && !data.token) {
 
-                    log.info("auth", `2FA token required for user ${data.username}. IP=${clientIP}`);
+                    log.info("auth", `用户 ${data.username} 请求 2FA token. IP=${clientIP}`);
 
                     callback({
                         tokenRequired: true,
@@ -413,7 +413,7 @@ let needSetup = false;
                             socket.userID,
                         ]);
 
-                        log.info("auth", `Successfully logged in user ${data.username}. IP=${clientIP}`);
+                        log.info("auth", `用户 ${data.username} 登录成功. IP=${clientIP}`);
 
                         callback({
                             ok: true,
@@ -421,7 +421,7 @@ let needSetup = false;
                         });
                     } else {
 
-                        log.warn("auth", `Invalid token provided for user ${data.username}. IP=${clientIP}`);
+                        log.warn("auth", `为用户 ${data.username} 提供的令牌无效. IP=${clientIP}`);
 
                         callback({
                             ok: false,
@@ -432,7 +432,7 @@ let needSetup = false;
                 }
             } else {
 
-                log.warn("auth", `Incorrect username or password for user ${data.username}. IP=${clientIP}`);
+                log.warn("auth", `用户 ${data.username} 的用户名或密码不正确. IP=${clientIP}`);
 
                 callback({
                     ok: false,
@@ -529,7 +529,7 @@ let needSetup = false;
                 });
             } catch (error) {
 
-                log.error("auth", `Error changing 2FA token. IP=${clientIP}`);
+                log.error("auth", `修改 2FA token 错误. IP=${clientIP}`);
 
                 callback({
                     ok: false,
@@ -550,7 +550,7 @@ let needSetup = false;
                 await doubleCheckPassword(socket, currentPassword);
                 await TwoFA.disable2FA(socket.userID);
 
-                log.info("auth", `Disabled 2FA token. IP=${clientIP}`);
+                log.info("auth", `已被禁用的 2FA token. IP=${clientIP}`);
 
                 callback({
                     ok: true,
@@ -559,7 +559,7 @@ let needSetup = false;
                 });
             } catch (error) {
 
-                log.error("auth", `Error disabling 2FA token. IP=${clientIP}`);
+                log.error("auth", `禁用 2FA token 失败. IP=${clientIP}`);
 
                 callback({
                     ok: false,
@@ -701,7 +701,7 @@ let needSetup = false;
                     await startMonitor(socket.userID, bean.id);
                 }
 
-                log.info("monitor", `Added Monitor: ${monitor.id} User ID: ${socket.userID}`);
+                log.info("monitor", `添加监测项: ${monitor.id} 用户 ID: ${socket.userID}`);
 
                 callback({
                     ok: true,
@@ -712,7 +712,7 @@ let needSetup = false;
 
             } catch (e) {
 
-                log.error("monitor", `Error adding Monitor: ${monitor.id} User ID: ${socket.userID}`);
+                log.error("monitor", `添加监测项失败: ${monitor.id} 用户 ID: ${socket.userID}`);
 
                 callback({
                     ok: false,
@@ -888,7 +888,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("monitor", `Get Monitor: ${monitorID} User ID: ${socket.userID}`);
+                log.info("monitor", `获取监视器: ${monitorID} 用户 ID: ${socket.userID}`);
 
                 let bean = await R.findOne("monitor", " id = ? AND user_id = ? ", [
                     monitorID,
@@ -912,7 +912,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("monitor", `Get Monitor Beats: ${monitorID} User ID: ${socket.userID}`);
+                log.info("monitor", `获取监视速率: ${monitorID} 用户 ID: ${socket.userID}`);
 
                 if (period == null) {
                     throw new Error("Invalid period.");
@@ -988,7 +988,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("manage", `Delete Monitor: ${monitorID} User ID: ${socket.userID}`);
+                log.info("manage", `删除监测: ${monitorID} 用户 ID: ${socket.userID}`);
 
                 if (monitorID in server.monitorList) {
                     await server.monitorList[monitorID].stop();
@@ -1007,7 +1007,7 @@ let needSetup = false;
 
                 const endTime = Date.now();
 
-                log.info("DB", `Delete Monitor completed in : ${endTime - startTime} ms`);
+                log.info("DB", `删除监视器成功，用时: ${endTime - startTime} ms`);
 
                 callback({
                     ok: true,
@@ -1343,7 +1343,7 @@ let needSetup = false;
 
                 // If Chrome Executable is changed, need to reset the browser
                 if (previousChromeExecutable !== data.chromeExecutable) {
-                    log.info("settings", "Chrome executable is changed. Resetting Chrome...");
+                    log.info("settings", "Chrome可执行文件已更改. 正在重启 Chrome...");
                     await resetChrome();
                 }
 
@@ -1451,7 +1451,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("manage", `Clear Events Monitor: ${monitorID} User ID: ${socket.userID}`);
+                log.info("manage", `清除事件检测日志: ${monitorID} 用户 ID: ${socket.userID}`);
 
                 await R.exec("UPDATE heartbeat SET msg = ?, important = ? WHERE monitor_id = ? ", [
                     "",
@@ -1475,7 +1475,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("manage", `Clear Heartbeats Monitor: ${monitorID} User ID: ${socket.userID}`);
+                log.info("manage", `清除心跳包监测日志: ${monitorID} 用户 ID: ${socket.userID}`);
 
                 await R.exec("DELETE FROM heartbeat WHERE monitor_id = ?", [
                     monitorID
@@ -1499,7 +1499,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                log.info("manage", `Clear Statistics User ID: ${socket.userID}`);
+                log.info("manage", `清除统计信息. 用户 ID: ${socket.userID}`);
 
                 await R.exec("DELETE FROM heartbeat");
                 await R.exec("DELETE FROM stat_daily");
@@ -1535,28 +1535,28 @@ let needSetup = false;
         generalSocketHandler(socket, server);
         chartSocketHandler(socket);
 
-        log.debug("server", "added all socket handlers");
+        log.debug("server", "已添加所有 socket 处理程序");
 
         // ***************************
         // Better do anything after added all socket handlers here
         // ***************************
 
-        log.debug("auth", "check auto login");
+        log.debug("auth", "检测自动登录");
         if (await setting("disableAuth")) {
-            log.info("auth", "Disabled Auth: auto login to admin");
+            log.info("auth", "已关闭用户验证登录：自动登录到管理员");
             await afterLogin(socket, await R.findOne("user"));
             socket.emit("autoLogin");
         } else {
             socket.emit("loginRequired");
-            log.debug("auth", "need auth");
+            log.debug("auth", "需要鉴权");
         }
 
     });
 
-    log.debug("server", "Init the server");
+    log.debug("server", "启动服务器");
 
     server.httpServer.once("error", async (err) => {
-        log.error("server", "Cannot listen: " + err.message);
+        log.error("server", "无法监听端口: " + err.message + " 可能是有程序正在占用.");
         await shutdownFunction();
         process.exit(1);
     });
@@ -1565,9 +1565,9 @@ let needSetup = false;
 
     server.httpServer.listen(port, hostname, () => {
         if (hostname) {
-            log.info("server", `Listening on ${hostname}:${port}`);
+            log.info("server", `服务器已启动. 正在监听 ${hostname}:${port}`);
         } else {
-            log.info("server", `Listening on ${port}`);
+            log.info("server", `服务器已启动. 正在监听端口 ${port}`);
         }
         startMonitors();
         checkVersion.startInterval();
@@ -1655,7 +1655,7 @@ async function afterLogin(socket, user) {
     // Set server timezone from client browser if not set
     // It should be run once only
     if (! await Settings.get("initServerTimezone")) {
-        log.debug("server", "emit initServerTimezone");
+        log.debug("server", "请求 initServerTimezone");
         socket.emit("initServerTimezone");
     }
 }
@@ -1667,9 +1667,9 @@ async function afterLogin(socket, user) {
  * @returns {Promise<void>}
  */
 async function initDatabase(testMode = false) {
-    log.debug("server", "Connecting to the database");
+    log.debug("server", "正在连接到数据库");
     await Database.connect(testMode);
-    log.info("server", "Connected to the database");
+    log.info("server", "数据库连接成功");
 
     // Patch the database
     await Database.patch();
@@ -1679,16 +1679,16 @@ async function initDatabase(testMode = false) {
     ]);
 
     if (! jwtSecretBean) {
-        log.info("server", "JWT secret is not found, generate one.");
+        log.info("server", "JWT 密钥不存在, 正在生成.");
         jwtSecretBean = await initJWTSecret();
-        log.info("server", "Stored JWT secret into database");
+        log.info("server", "将 JWT 密钥存储到数据库中.");
     } else {
-        log.debug("server", "Load JWT secret from database.");
+        log.debug("server", "从数据库载入 JWT 密钥.");
     }
 
     // If there is no record in user table, it is a new Uptime Kuma instance, need to setup
     if ((await R.knex("user").count("id as count").first()).count === 0) {
-        log.info("server", "No user, need setup");
+        log.info("server", "未找到任何用户, 需要执行初始化");
         needSetup = true;
     }
 
@@ -1704,7 +1704,7 @@ async function initDatabase(testMode = false) {
 async function startMonitor(userID, monitorID) {
     await checkOwner(userID, monitorID);
 
-    log.info("manage", `Resume Monitor: ${monitorID} User ID: ${userID}`);
+    log.info("manage", `重启监视器: ${monitorID} 用户 ID: ${userID}`);
 
     await R.exec("UPDATE monitor SET active = 1 WHERE id = ? AND user_id = ? ", [
         monitorID,
@@ -1742,7 +1742,7 @@ async function restartMonitor(userID, monitorID) {
 async function pauseMonitor(userID, monitorID) {
     await checkOwner(userID, monitorID);
 
-    log.info("manage", `Pause Monitor: ${monitorID} User ID: ${userID}`);
+    log.info("manage", `暂停监测: ${monitorID} 用户 ID: ${userID}`);
 
     await R.exec("UPDATE monitor SET active = 0 WHERE id = ? AND user_id = ? ", [
         monitorID,
@@ -1780,12 +1780,12 @@ async function startMonitors() {
  * @returns {Promise<void>}
  */
 async function shutdownFunction(signal) {
-    log.info("server", "Shutdown requested");
-    log.info("server", "Called signal: " + signal);
+    log.info("server", "已得到关闭服务器请求");
+    log.info("server", "返回信息: " + signal);
 
     await server.stop();
 
-    log.info("server", "Stopping all monitors");
+    log.info("server", "正在停止所有监测服务");
     for (let id in server.monitorList) {
         let monitor = server.monitorList[id];
         await monitor.stop();
@@ -1807,7 +1807,7 @@ async function shutdownFunction(signal) {
  * @returns {void}
  */
 function finalFunction() {
-    log.info("server", "Graceful shutdown successful!");
+    log.info("server", "服务器安全关闭成功!");
 }
 
 gracefulShutdown(server.httpServer, {
@@ -1823,7 +1823,7 @@ gracefulShutdown(server.httpServer, {
 let unexpectedErrorHandler = (error, promise) => {
     console.trace(error);
     UptimeKumaServer.errorLog(error, false);
-    console.error("If you keep encountering errors, please report to https://github.com/louislam/uptime-kuma/issues");
+    console.error("如果您一直遇到错误，请向上游项目 https://github.com/louislam/uptime-kuma/issues 报告，以便我们跟近更新.");
 };
 process.addListener("unhandledRejection", unexpectedErrorHandler);
 process.addListener("uncaughtException", unexpectedErrorHandler);
