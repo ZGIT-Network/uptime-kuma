@@ -1320,7 +1320,7 @@ class Monitor extends BeanModel {
             }
 
 
-            let msg = `[${monitor.name}] \n${maskIPv4Address(bean.msg)} \n系统监测状态: [ ${text} ] \n时间戳: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`;
+            let msg = `Network 远程状态监测服务 \n [${monitor.name}] \n${maskIPv4Address(bean.msg)} \n系统监测状态: [ ${text} ] \n时间戳: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`;
 
 
             for (let notification of notificationList) {
