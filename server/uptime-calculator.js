@@ -198,7 +198,7 @@ class UptimeCalculator {
         let flatStatus = this.flatStatus(status);
 
         if (flatStatus === DOWN && ping > 0) {
-            log.warn("uptime-calc", "The ping is not effective when the status is DOWN");
+            log.warn("uptime-calc", "当状态为 DOWN 时，ping无效");
         }
 
         let divisionKey = this.getMinutelyKey(date);
@@ -278,7 +278,7 @@ class UptimeCalculator {
 
         // Don't store data in test mode
         if (process.env.TEST_BACKEND) {
-            log.debug("uptime-calc", "Skip storing data in test mode");
+            log.debug("uptime-calc", "在调试模式下跳过数据存储");
             return date;
         }
 
@@ -328,7 +328,7 @@ class UptimeCalculator {
         await R.store(minutelyStatBean);
 
         // Remove the old data
-        log.debug("uptime-calc", "Remove old data");
+        log.debug("uptime-calc", "清除旧数据");
         await R.exec("DELETE FROM stat_minutely WHERE monitor_id = ? AND timestamp < ?", [
             this.monitorID,
             this.getMinutelyKey(date.subtract(24, "hour")),

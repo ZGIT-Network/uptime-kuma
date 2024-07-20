@@ -110,7 +110,7 @@ class Maintenance extends BeanModel {
      * @returns {number[]} Array of active weekdays
      */
     getDayOfWeekList() {
-        log.debug("timeslot", "List: " + this.weekdays);
+        log.debug("timeslot", "列表: " + this.weekdays);
         return JSON.parse(this.weekdays).sort(function (a, b) {
             return a - b;
         });
@@ -203,11 +203,11 @@ class Maintenance extends BeanModel {
      */
     async run(throwError = false) {
         if (this.beanMeta.job) {
-            log.debug("maintenance", "Maintenance is already running, stop it first. id: " + this.id);
+            log.debug("maintenance", "维护已在运行,请先停止. id: " + this.id);
             this.stop();
         }
 
-        log.debug("maintenance", "Run maintenance id: " + this.id);
+        log.debug("maintenance", "启动维护 id: " + this.id);
 
         // 1.21.2 migration
         if (!this.cron) {
@@ -224,7 +224,7 @@ class Maintenance extends BeanModel {
             // Do nothing, because it is controlled by the user
         } else if (this.strategy === "single") {
             this.beanMeta.job = new Cron(this.start_date, { timezone: await this.getTimezone() }, () => {
-                log.info("maintenance", "Maintenance id: " + this.id + " is under maintenance now");
+                log.info("maintenance", "维护计划 id: " + this.id + " 现在正在维护");
                 UptimeKumaServer.getInstance().sendMaintenanceListByUserID(this.user_id);
                 apicache.clear();
             });
@@ -234,7 +234,7 @@ class Maintenance extends BeanModel {
                 this.beanMeta.status = "scheduled";
 
                 let startEvent = (customDuration = 0) => {
-                    log.info("maintenance", "Maintenance id: " + this.id + " is under maintenance now");
+                    log.info("maintenance", "维护计划 id: " + this.id + " 现在正在维护");
 
                     this.beanMeta.status = "under-maintenance";
                     clearTimeout(this.beanMeta.durationTimeout);
@@ -273,12 +273,12 @@ class Maintenance extends BeanModel {
 
                 if (runningTimeslot) {
                     let duration = dayjs(runningTimeslot.endDate).diff(current, "second") * 1000;
-                    log.debug("maintenance", "Maintenance id: " + this.id + " Remaining duration: " + duration + "ms");
+                    log.debug("maintenance", "维护计划 id: " + this.id + " 剩余维护日期: " + duration + "ms");
                     startEvent(duration);
                 }
 
             } catch (e) {
-                log.error("maintenance", "Error in maintenance id: " + this.id);
+                log.error("maintenance", "维护计划 id 发生错误: " + this.id);
                 log.error("maintenance", "Cron: " + this.cron);
                 log.error("maintenance", e);
 
@@ -288,7 +288,7 @@ class Maintenance extends BeanModel {
             }
 
         } else {
-            log.error("maintenance", "Maintenance id: " + this.id + " has no cron");
+            log.error("maintenance", "维护计划 id: " + this.id + " 没有 cron");
         }
     }
 
@@ -406,7 +406,7 @@ class Maintenance extends BeanModel {
      * @returns {Promise<void>}
      */
     async generateCron() {
-        log.info("maintenance", "Generate cron for maintenance id: " + this.id);
+        log.info("maintenance", " 为维护计划 id: " + this.id + "生成 cron");
 
         if (this.strategy === "cron") {
             // Do nothing for cron
@@ -417,7 +417,7 @@ class Maintenance extends BeanModel {
             this.cron = "* * * * *";
             this.duration = this.calcDuration();
             log.debug("maintenance", "Cron: " + this.cron);
-            log.debug("maintenance", "Duration: " + this.duration);
+            log.debug("maintenance", "持续时间: " + this.duration);
         } else if (this.strategy === "recurring-weekday") {
             let list = this.getDayOfWeekList();
             let array = this.start_time.split(":");

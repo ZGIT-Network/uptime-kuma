@@ -455,7 +455,7 @@ class Monitor extends BeanModel {
                         secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT,
                     };
 
-                    log.debug("monitor", `[${this.name}] Prepare Options for axios`);
+                    log.debug("monitor", `[${this.name}] 为 Axios 准备选项`);
 
                     let contentType = null;
                     let bodyValue = null;
@@ -547,8 +547,8 @@ class Monitor extends BeanModel {
                         });
                     });
 
-                    log.debug("monitor", `[${this.name}] Axios Options: ${JSON.stringify(options)}`);
-                    log.debug("monitor", `[${this.name}] Axios Request`);
+                    log.debug("monitor", `[${this.name}] Axios 选择: ${JSON.stringify(options)}`);
+                    log.debug("monitor", `[${this.name}] Axios 请求`);
 
                     // Make Request
                     let res = await this.makeAxiosRequest(options);
@@ -621,7 +621,7 @@ class Monitor extends BeanModel {
                     bean.msg = "";
                     bean.status = UP;
                 } else if (this.type === "push") {      // Type: Push
-                    log.debug("monitor", `[${this.name}] Checking monitor at ${dayjs().format("YYYY-MM-DD HH:mm:ss.SSS")}`);
+                    log.debug("monitor", `[${this.name}] 在 ${dayjs().format("YYYY-MM-DD HH:mm:ss.SSS")} 检查监视器`);
                     const bufferTime = 1000; // 1s buffer to accommodate clock differences
 
                     if (previousBeat) {
@@ -643,7 +643,7 @@ class Monitor extends BeanModel {
                             }
                             // No need to insert successful heartbeat for push type, so end here
                             retries = 0;
-                            log.debug("monitor", `[${this.name}] timeout = ${timeout}`);
+                            log.debug("monitor", `[${this.name}] 超时 = ${timeout}`);
                             this.heartbeatInterval = setTimeout(safeBeat, timeout);
                             return;
                         }
@@ -710,7 +710,7 @@ class Monitor extends BeanModel {
                         throw new Error(e.message);
                     }
                 } else if (this.type === "docker") {
-                    log.debug("monitor", `[${this.name}] Prepare Options for Axios`);
+                    log.debug("monitor", `[${this.name}] 为 Axios 准备选项`);
 
                     const options = {
                         url: `/containers/${this.docker_container}/json`,
@@ -743,7 +743,7 @@ class Monitor extends BeanModel {
                         );
                     }
 
-                    log.debug("monitor", `[${this.name}] Axios Request`);
+                    log.debug("monitor", `[${this.name}] Axios 请求`);
                     let res = await axios.request(options);
 
                     if (res.data.State.Running) {
@@ -777,7 +777,7 @@ class Monitor extends BeanModel {
                     };
                     const response = await grpcQuery(options);
                     bean.ping = dayjs().valueOf() - startTime;
-                    log.debug("monitor:", `gRPC response: ${JSON.stringify(response)}`);
+                    log.debug("monitor:", `gRPC 报文: ${JSON.stringify(response)}`);
                     let responseData = response.data;
                     if (responseData.length > 50) {
                         responseData = responseData.toString().substring(0, 47) + "...";
@@ -791,7 +791,7 @@ class Monitor extends BeanModel {
                             bean.status = UP;
                             bean.msg = `${responseData}, keyword [${this.keyword}] ${keywordFound ? "is" : "not"} found`;
                         } else {
-                            log.debug("monitor:", `GRPC response [${response.data}] + ", but keyword [${this.keyword}] is ${keywordFound ? "present" : "not"} in [" + ${response.data} + "]"`);
+                            log.debug("monitor:", `GRPC 回复 [${response.data}] + ", 但是关键词 [${this.keyword}]  ${keywordFound ? "present" : "not"} 在 [" + ${response.data} + "]"`);
                             bean.status = DOWN;
                             bean.msg = `, but keyword [${this.keyword}] is ${keywordFound ? "present" : "not"} in [" + ${responseData} + "]`;
                         }
@@ -912,7 +912,7 @@ class Monitor extends BeanModel {
 
             bean.retries = retries;
 
-            log.debug("monitor", `[${this.name}] Check isImportant`);
+            log.debug("monitor", `[${this.name}] 执行重要检查 (isImportant)`);
             let isImportant = Monitor.isImportantBeat(isFirstBeat, previousBeat?.status, bean.status);
 
             // Mark as important if status changed, ignore pending pings,
@@ -921,17 +921,17 @@ class Monitor extends BeanModel {
                 bean.important = true;
 
                 if (Monitor.isImportantForNotification(isFirstBeat, previousBeat?.status, bean.status)) {
-                    log.debug("monitor", `[${this.name}] sendNotification`);
+                    log.debug("monitor", `[${this.name}] 发送通知 (sendNotification)`);
                     await Monitor.sendNotification(isFirstBeat, this, bean);
                 } else {
-                    log.debug("monitor", `[${this.name}] will not sendNotification because it is (or was) under maintenance`);
+                    log.debug("monitor", `[${this.name}] 不会执行发送通知 (sendNotification)，因为它正在（或曾经）维护中`);
                 }
 
                 // Reset down count
                 bean.downCount = 0;
 
                 // Clear Status Page Cache
-                log.debug("monitor", `[${this.name}] apicache clear`);
+                log.debug("monitor", `[${this.name}] API缓存 (apicache) 清理`);
                 apicache.clear();
 
                 await UptimeKumaServer.getInstance().sendMaintenanceListByUserID(this.user_id);
@@ -943,7 +943,7 @@ class Monitor extends BeanModel {
                     ++bean.downCount;
                     if (bean.downCount >= this.resendInterval) {
                         // Send notification again, because we are still DOWN
-                        log.debug("monitor", `[${this.name}] sendNotification again: Down Count: ${bean.downCount} | Resend Interval: ${this.resendInterval}`);
+                        log.debug("monitor", `[${this.name}] 再次发送通知 (sendNotification): 倒数: ${bean.downCount} | 重新发送间隔: ${this.resendInterval}`);
                         await Monitor.sendNotification(isFirstBeat, this, bean);
 
                         // Reset down count
@@ -953,16 +953,16 @@ class Monitor extends BeanModel {
             }
 
             if (bean.status === UP) {
-                log.debug("monitor", `Monitor #${this.id} '${this.name}': Successful Response: ${bean.ping} ms | Interval: ${beatInterval} seconds | Type: ${this.type}`);
+                log.debug("monitor", `监测器 #${this.id} '${this.name}': 成功响应: ${bean.ping} ms | 间隔: ${beatInterval} 秒 | 类型: ${this.type}`);
             } else if (bean.status === PENDING) {
                 if (this.retryInterval > 0) {
                     beatInterval = this.retryInterval;
                 }
-                log.warn("monitor", `Monitor #${this.id} '${this.name}': Pending: ${bean.msg} | Max retries: ${this.maxretries} | Retry: ${retries} | Retry Interval: ${beatInterval} seconds | Type: ${this.type}`);
+                log.warn("monitor", `监测器 #${this.id} '${this.name}': 待定: ${bean.msg} | 最大重试次数: ${this.maxretries} | 重试: ${retries} | 重试间隔: ${beatInterval} 秒 | 类型: ${this.type}`);
             } else if (bean.status === MAINTENANCE) {
-                log.warn("monitor", `Monitor #${this.id} '${this.name}': Under Maintenance | Type: ${this.type}`);
+                log.warn("monitor", `监测器 #${this.id} '${this.name}': 维护中 | 类型: ${this.type}`);
             } else {
-                log.warn("monitor", `Monitor #${this.id} '${this.name}': Failing: ${bean.msg} | Interval: ${beatInterval} seconds | Type: ${this.type} | Down Count: ${bean.downCount} | Resend Interval: ${this.resendInterval}`);
+                log.warn("monitor", `监测器 #${this.id} '${this.name}': 请求失败: ${bean.msg} | 间隔: ${beatInterval} 秒 | 类型: ${this.type} | 倒数: ${bean.downCount} | 重试间隔: ${this.resendInterval}`);
             }
 
             // Calculate uptime
@@ -971,12 +971,12 @@ class Monitor extends BeanModel {
             bean.end_time = R.isoDateTimeMillis(endTimeDayjs);
 
             // Send to frontend
-            log.debug("monitor", `[${this.name}] Send to socket`);
+            log.debug("monitor", `[${this.name}] 发送至 socket`);
             io.to(this.user_id).emit("heartbeat", bean.toJSON());
             Monitor.sendStats(io, this.id, this.user_id);
 
             // Store to database
-            log.debug("monitor", `[${this.name}] Store`);
+            log.debug("monitor", `[${this.name}] 储存中`);
             await R.store(bean);
 
             log.debug("monitor", `[${this.name}] prometheus.update`);
@@ -985,18 +985,18 @@ class Monitor extends BeanModel {
             previousBeat = bean;
 
             if (! this.isStop) {
-                log.debug("monitor", `[${this.name}] SetTimeout for next check.`);
+                log.debug("monitor", `[${this.name}] 设置下次检查的超时时间 (SetTimeout).`);
 
                 let intervalRemainingMs = Math.max(
                     1,
                     beatInterval * 1000 - dayjs().diff(dayjs.utc(bean.time))
                 );
 
-                log.debug("monitor", `[${this.name}] Next heartbeat in: ${intervalRemainingMs}ms`);
+                log.debug("monitor", `[${this.name}] 下一次心跳: ${intervalRemainingMs}ms`);
 
                 this.heartbeatInterval = setTimeout(safeBeat, intervalRemainingMs);
             } else {
-                log.info("monitor", `[${this.name}] isStop = true, no next check.`);
+                log.info("monitor", `[${this.name}] isStop = true, 不再进行下次检查.`);
             }
 
         };
@@ -1011,10 +1011,10 @@ class Monitor extends BeanModel {
             } catch (e) {
                 console.trace(e);
                 UptimeKumaServer.errorLog(e, false);
-                log.error("monitor", "Please report to https://github.com/louislam/uptime-kuma/issues");
+                log.error("monitor", "遇到错误，请反馈至 https://github.com/louislam/uptime-kuma/issues");
 
                 if (! this.isStop) {
-                    log.info("monitor", "Try to restart the monitor");
+                    log.info("monitor", "尝试重启监测器");
                     this.heartbeatInterval = setTimeout(safeBeat, this.interval * 1000);
                 }
             }
@@ -1075,7 +1075,7 @@ class Monitor extends BeanModel {
             // Fix #2253
             // Read more: https://stackoverflow.com/questions/1759956/curl-error-18-transfer-closed-with-outstanding-read-data-remaining
             if (!finalCall && typeof error.message === "string" && error.message.includes("maxContentLength size of -1 exceeded")) {
-                log.debug("monitor", "makeAxiosRequest with gzip");
+                log.debug("monitor", "makeAxiosRequest 随 gzip");
                 options.headers["Accept-Encoding"] = "gzip, deflate";
                 return this.makeAxiosRequest(options, true);
             } else {
@@ -1156,17 +1156,17 @@ class Monitor extends BeanModel {
 
                 if (isValidObjects) {
                     if (oldCertInfo.certInfo.fingerprint256 !== checkCertificateResult.certInfo.fingerprint256) {
-                        log.debug("monitor", "Resetting sent_history");
+                        log.debug("monitor", "重置 (发送历史)sent_history");
                         await R.exec("DELETE FROM notification_sent_history WHERE type = 'certificate' AND monitor_id = ?", [
                             this.id
                         ]);
                     } else {
-                        log.debug("monitor", "No need to reset sent_history");
+                        log.debug("monitor", "不需要重置 (发送历史)sent_history");
                         log.debug("monitor", oldCertInfo.certInfo.fingerprint256);
                         log.debug("monitor", checkCertificateResult.certInfo.fingerprint256);
                     }
                 } else {
-                    log.debug("monitor", "Not valid object");
+                    log.debug("monitor", "无效对象");
                 }
             } catch (e) { }
 
@@ -1208,7 +1208,7 @@ class Monitor extends BeanModel {
             // Send Cert Info
             await Monitor.sendCertInfo(io, monitorID, userID);
         } else {
-            log.debug("monitor", "No clients in the room, no need to send stats");
+            log.debug("monitor", "room 中没有客户端，不需要发送统计数据");
         }
     }
 
@@ -1339,7 +1339,7 @@ class Monitor extends BeanModel {
 
                     await Notification.send(JSON.parse(notification.config), msg, await monitor.toJSON(false), heartbeatJSON);
                 } catch (e) {
-                    log.error("monitor", "Cannot send notification to " + notification.name);
+                    log.error("monitor", "无法发送通知到 " + notification.name);
                     log.error("monitor", e);
                 }
             }
@@ -1369,7 +1369,7 @@ class Monitor extends BeanModel {
 
             if (! notificationList.length > 0) {
                 // fail fast. If no notification is set, all the following checks can be skipped.
-                log.debug("monitor", "No notification, no need to send cert notification");
+                log.debug("monitor", "无需通知，无需发送证书通知.");
                 return;
             }
 
@@ -1386,12 +1386,12 @@ class Monitor extends BeanModel {
                     while (certInfo) {
                         let subjectCN = certInfo.subject["CN"];
                         if (rootCertificates.has(certInfo.fingerprint256)) {
-                            log.debug("monitor", `Known root cert: ${certInfo.certType} certificate "${subjectCN}" (${certInfo.daysRemaining} days valid) on ${targetDays} deadline.`);
+                            log.debug("monitor", `已知根证书: ${certInfo.certType} 证书 "${subjectCN}"( ${certInfo.daysRemaining}天有效) 在 ${targetDays} 截止日期.`);
                             break;
                         } else if (certInfo.daysRemaining > targetDays) {
-                            log.debug("monitor", `No need to send cert notification for ${certInfo.certType} certificate "${subjectCN}" (${certInfo.daysRemaining} days valid) on ${targetDays} deadline.`);
+                            log.debug("monitor", `无需在 ${targetDays} 截止日期前为 ${certInfo.certType}证书 "${subjectCN}" (${certInfo.daysRemaining} 天有效) 发送证书通知.`);
                         } else {
-                            log.debug("monitor", `call sendCertNotificationByTargetDays for ${targetDays} deadline on certificate ${subjectCN}.`);
+                            log.debug("monitor", `对于证书 ${subjectCN} 的 ${targetDays} 截止日期，调用 sendCertNotificationByTargetDays.`);
                             await this.sendCertNotificationByTargetDays(subjectCN, certInfo.certType, certInfo.daysRemaining, targetDays, notificationList);
                         }
                         certInfo = certInfo.issuerCertificate;
@@ -1421,20 +1421,20 @@ class Monitor extends BeanModel {
 
         // Sent already, no need to send again
         if (row) {
-            log.debug("monitor", "Sent already, no need to send again");
+            log.debug("monitor", "已发送,无法再次发送n");
             return;
         }
 
         let sent = false;
-        log.debug("monitor", "Send certificate notification");
+        log.debug("monitor", "发送证书通知");
 
         for (let notification of notificationList) {
             try {
-                log.debug("monitor", "Sending to " + notification.name);
+                log.debug("monitor", "发送至 " + notification.name);
                 await Notification.send(JSON.parse(notification.config), `[${this.name}][${this.url}] ${certType} certificate ${certCN} will be expired in ${daysRemaining} days`);
                 sent = true;
             } catch (e) {
-                log.error("monitor", "Cannot send cert notification to " + notification.name);
+                log.error("monitor", "无法发送证书通知到 " + notification.name);
                 log.error("monitor", e);
             }
         }
@@ -1603,12 +1603,12 @@ class Monitor extends BeanModel {
      * @returns {Promise<object>} OAuthProvider client
      */
     async makeOidcTokenClientCredentialsRequest() {
-        log.debug("monitor", `[${this.name}] The oauth access-token undefined or expired. Requesting a new token`);
+        log.debug("monitor", `[${this.name}] oauth 访问令牌未定义或已过期. 请求新令牌`);
         const oAuthAccessToken = await getOidcTokenClientCredentials(this.oauth_token_url, this.oauth_client_id, this.oauth_client_secret, this.oauth_scopes, this.oauth_auth_method);
         if (this.oauthAccessToken?.expires_at) {
-            log.debug("monitor", `[${this.name}] Obtained oauth access-token. Expires at ${new Date(this.oauthAccessToken?.expires_at * 1000)}`);
+            log.debug("monitor", `[${this.name}] 已获得 oauth 访问令牌. 过期于 ${new Date(this.oauthAccessToken?.expires_at * 1000)}`);
         } else {
-            log.debug("monitor", `[${this.name}] Obtained oauth access-token. Time until expiry was not provided`);
+            log.debug("monitor", `[${this.name}] 已获得 oauth 访问令牌. 未提供到期时间`);
         }
 
         return oAuthAccessToken;
@@ -1624,7 +1624,7 @@ class Monitor extends BeanModel {
         this.prometheus?.update(null, tlsInfo);
 
         if (!this.getIgnoreTls() && this.isEnabledExpiryNotification()) {
-            log.debug("monitor", `[${this.name}] call checkCertExpiryNotifications`);
+            log.debug("monitor", `[${this.name}] 调用 checkCertExpiryNotifications`);
             await this.checkCertExpiryNotifications(tlsInfo);
         }
     }

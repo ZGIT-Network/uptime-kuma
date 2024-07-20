@@ -29,14 +29,14 @@ class SNMPMonitorType extends MonitorType {
                     error ? reject(error) : resolve(varbinds);
                 });
             });
-            log.debug("monitor", `SNMP: Received varbinds (Type: ${snmp.ObjectType[varbinds[0].type]} Value: ${varbinds[0].value})`);
+            log.debug("monitor", `SNMP: 收到 varbinds (类型: ${snmp.ObjectType[varbinds[0].type]} 值: ${varbinds[0].value})`);
 
             if (varbinds.length === 0) {
-                throw new Error(`No varbinds returned from SNMP session (OID: ${monitor.snmpOid})`);
+                throw new Error(`\`SNMP 会话未返回 varbinds (OID: ${monitor.snmpOid})`);
             }
 
             if (varbinds[0].type === snmp.ObjectType.NoSuchInstance) {
-                throw new Error(`The SNMP query returned that no instance exists for OID ${monitor.snmpOid}`);
+                throw new Error(`SNMP 查询返回 OID: ${monitor.snmpOid} 不存在实例 `);
             }
 
             // We restrict querying to one OID per monitor, therefore `varbinds[0]` will always contain the value we're interested in.

@@ -152,7 +152,7 @@ class Database {
             fs.mkdirSync(Database.dockerTLSDir, { recursive: true });
         }
 
-        log.info("server", `Data Dir: ${Database.dataDir}`);
+        log.info("server", `数据目录: ${Database.dataDir}`);
     }
 
     /**
@@ -214,12 +214,12 @@ class Database {
             idleTimeoutMillis: 30000,
         };
 
-        log.info("db", `Database Type: ${dbConfig.type}`);
+        log.info("db", `数据库类型: ${dbConfig.type}`);
 
         if (dbConfig.type === "sqlite") {
 
             if (! fs.existsSync(Database.sqlitePath)) {
-                log.info("server", "Copying Database");
+                log.info("server", "正在拷贝数据库");
                 fs.copyFileSync(Database.templatePath, Database.sqlitePath);
             }
 
@@ -278,7 +278,7 @@ class Database {
         } else if (dbConfig.type === "embedded-mariadb") {
             let embeddedMariaDB = EmbeddedMariaDB.getInstance();
             await embeddedMariaDB.start();
-            log.info("mariadb", "Embedded MariaDB started");
+            log.info("mariadb", "嵌入式 MariaDB 已启动");
             config = {
                 client: "mysql2",
                 connection: {
@@ -354,10 +354,10 @@ class Database {
         await R.exec("PRAGMA synchronous = NORMAL");
 
         if (!noLog) {
-            log.debug("db", "SQLite config:");
+            log.debug("db", "SQLite 配置:");
             log.debug("db", await R.getAll("PRAGMA journal_mode"));
             log.debug("db", await R.getAll("PRAGMA cache_size"));
-            log.debug("db", "SQLite Version: " + await R.getCell("SELECT sqlite_version()"));
+            log.debug("db", "SQLite 版本: " + await R.getCell("SELECT sqlite_version()"));
         }
     }
 
@@ -366,14 +366,14 @@ class Database {
      * @returns {Promise<void>}
      */
     static async initMariaDB() {
-        log.debug("db", "Checking if MariaDB database exists...");
+        log.debug("db", "正在检查 MariaDB 数据库是否存在...");
 
         let hasTable = await R.hasTable("docker_host");
         if (!hasTable) {
             const { createTables } = require("../db/knex_init_db");
             await createTables();
         } else {
-            log.debug("db", "MariaDB database already exists");
+            log.debug("db", "MariaDB 数据库已存在");
         }
     }
 
@@ -398,9 +398,9 @@ class Database {
             // Allow missing patch files for downgrade or testing pr.
             if (e.message.includes("the following files are missing:")) {
                 log.warn("db", e.message);
-                log.warn("db", "Database migration failed, you may be downgrading Uptime Kuma.");
+                log.warn("db", "数据库迁移失败，您可能正在降级 Uptime Kuma.");
             } else {
-                log.error("db", "Database migration failed");
+                log.error("db", "数据库迁移失败.");
                 throw e;
             }
         }
@@ -427,32 +427,32 @@ class Database {
         }
 
         if (version !== this.latestVersion) {
-            log.info("db", "Your database version: " + version);
-            log.info("db", "Latest database version: " + this.latestVersion);
+            log.info("db", "您的数据库版本: " + version);
+            log.info("db", "最新数据库版本: " + this.latestVersion);
         }
 
         if (version === this.latestVersion) {
-            log.debug("db", "Database patch not needed");
+            log.debug("db", "不需要数据库补丁");
         } else if (version > this.latestVersion) {
-            log.warn("db", "Warning: Database version is newer than expected");
+            log.warn("db", "警告: 数据库版本比预期的要新。");
         } else {
-            log.info("db", "Database patch is needed");
+            log.info("db", "需要数据库补丁");
 
             // Try catch anything here
             try {
                 for (let i = version + 1; i <= this.latestVersion; i++) {
                     const sqlFile = `./db/old_migrations/patch${i}.sql`;
-                    log.info("db", `Patching ${sqlFile}`);
+                    log.info("db", `修补中 ${sqlFile}`);
                     await Database.importSQLFile(sqlFile);
-                    log.info("db", `Patched ${sqlFile}`);
+                    log.info("db", `修补完成 ${sqlFile}`);
                     await setSetting("database_version", i);
                 }
             } catch (ex) {
                 await Database.close();
 
                 log.error("db", ex);
-                log.error("db", "Start Uptime-Kuma failed due to issue patching the database");
-                log.error("db", "Please submit a bug report if you still encounter the problem after restart: https://github.com/louislam/uptime-kuma/issues");
+                log.error("db", "由于数据库修补问题，启动 Uptime-Kuma 失败");
+                log.error("db", "如果重启后仍然遇到问题，请提交错误报告: https://github.com/louislam/uptime-kuma/issues");
 
                 process.exit(1);
             }
@@ -470,14 +470,14 @@ class Database {
      * @returns {Promise<void>}
      */
     static async patchSqlite2() {
-        log.debug("db", "Database Patch 2.0 Process");
+        log.debug("db", "数据库修补 2.0 程序");
         let databasePatchedFiles = await setting("databasePatchedFiles");
 
         if (! databasePatchedFiles) {
             databasePatchedFiles = {};
         }
 
-        log.debug("db", "Patched files:");
+        log.debug("db", "修补文件:");
         log.debug("db", databasePatchedFiles);
 
         try {
@@ -486,15 +486,15 @@ class Database {
             }
 
             if (this.patched) {
-                log.info("db", "Database Patched Successfully");
+                log.info("db", "数据库修补成功");
             }
 
         } catch (ex) {
             await Database.close();
 
             log.error("db", ex);
-            log.error("db", "Start Uptime-Kuma failed due to issue patching the database");
-            log.error("db", "Please submit the bug report if you still encounter the problem after restart: https://github.com/louislam/uptime-kuma/issues");
+            log.error("db", "由于数据库修补问题，启动 Uptime-Kuma 失败");
+            log.error("db", "如果重启后仍然遇到问题，请提交错误报告:  https://github.com/louislam/uptime-kuma/issues");
 
             process.exit(1);
         }
@@ -583,29 +583,29 @@ class Database {
         let value = this.patchList[sqlFilename];
 
         if (! value) {
-            log.info("db", sqlFilename + " skip");
+            log.info("db", sqlFilename + " 跳过");
             return;
         }
 
         // Check if patched
         if (! databasePatchedFiles[sqlFilename]) {
-            log.info("db", sqlFilename + " is not patched");
+            log.info("db", sqlFilename + " 尚未被修补");
 
             if (value.parents) {
-                log.info("db", sqlFilename + " need parents");
+                log.info("db", sqlFilename + " 需要 parents");
                 for (let parentSQLFilename of value.parents) {
                     await this.patch2Recursion(parentSQLFilename, databasePatchedFiles);
                 }
             }
 
-            log.info("db", sqlFilename + " is patching");
+            log.info("db", sqlFilename + " 正在修补");
             this.patched = true;
             await this.importSQLFile("./db/old_migrations/" + sqlFilename);
             databasePatchedFiles[sqlFilename] = true;
-            log.info("db", sqlFilename + " was patched successfully");
+            log.info("db", sqlFilename + " 已被修补成功");
 
         } else {
-            log.debug("db", sqlFilename + " is already patched, skip");
+            log.debug("db", sqlFilename + " 已经被修补, 跳过");
         }
     }
 
@@ -653,7 +653,7 @@ class Database {
         };
         process.addListener("unhandledRejection", listener);
 
-        log.info("db", "Closing the database");
+        log.info("db", "正在关闭数据库");
 
         // Flush WAL to main database
         if (Database.dbConfig.type === "sqlite") {
@@ -668,10 +668,10 @@ class Database {
             if (Database.noReject) {
                 break;
             } else {
-                log.info("db", "Waiting to close the database");
+                log.info("db", "等待数据库管不");
             }
         }
-        log.info("db", "Database closed");
+        log.info("db", "数据库已关闭");
 
         process.removeListener("unhandledRejection", listener);
     }

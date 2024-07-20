@@ -76,7 +76,7 @@ class Notification {
      * @throws Duplicate notification providers in list
      */
     static init() {
-        log.debug("notification", "Prepare Notification Providers");
+        log.debug("notification", "准备通知提供者");
 
         this.providerList = {};
 

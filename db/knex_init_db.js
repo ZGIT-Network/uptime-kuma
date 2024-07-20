@@ -8,7 +8,7 @@ const { log } = require("../src/util");
  * @returns {Promise<void>}
  */
 async function createTables() {
-    log.info("mariadb", "Creating basic tables for MariaDB");
+    log.info("mariadb", "正在为 MariaDB 创建基本数据表");
     const knex = R.knex;
 
     // TODO: Should check later if it is really the final patch sql file.
@@ -557,7 +557,7 @@ ALTER TABLE monitor
         table.boolean("gamedig_given_port_only").defaultTo(1).notNullable();
     });
 
-    log.info("mariadb", "Created basic tables for MariaDB");
+    log.info("mariadb", "为 MariaDB 创建基本表");
 }
 
 module.exports = {

@@ -18,7 +18,7 @@ exports.startInterval = () => {
             return;
         }
 
-        log.debug("update-checker", "Retrieving latest versions");
+        log.debug("update-checker", "正在检索最新版本");
 
         try {
             const res = await axios.get(UPDATE_CHECKER_LATEST_VERSION_URL);
@@ -42,7 +42,7 @@ exports.startInterval = () => {
             }
 
         } catch (_) {
-            log.info("update-checker", "Failed to check for new versions");
+            log.info("update-checker", "新版本检查失败");
         }
 
     };

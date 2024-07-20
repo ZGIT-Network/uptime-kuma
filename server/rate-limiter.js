@@ -24,7 +24,7 @@ class KumaRateLimiter {
      */
     async pass(callback, num = 1) {
         const remainingRequests = await this.removeTokens(num);
-        log.info("rate-limit", "remaining requests: " + remainingRequests);
+        log.info("rate-limit", "剩余请求: " + remainingRequests);
         if (remainingRequests < 0) {
             if (callback) {
                 callback({

@@ -66,7 +66,7 @@ class Prometheus {
                 }
                 monitorCertIsValid.set(this.monitorLabelValues, isValid);
             } catch (e) {
-                log.error("prometheus", "Caught error");
+                log.error("prometheus", "捕获错误");
                 log.error("prometheus", e);
             }
 
@@ -75,7 +75,7 @@ class Prometheus {
                     monitorCertDaysRemaining.set(this.monitorLabelValues, tlsInfo.certInfo.daysRemaining);
                 }
             } catch (e) {
-                log.error("prometheus", "Caught error");
+                log.error("prometheus", "捕获错误");
                 log.error("prometheus", e);
             }
         }
@@ -84,7 +84,7 @@ class Prometheus {
             try {
                 monitorStatus.set(this.monitorLabelValues, heartbeat.status);
             } catch (e) {
-                log.error("prometheus", "Caught error");
+                log.error("prometheus", "捕获错误");
                 log.error("prometheus", e);
             }
 
@@ -96,7 +96,7 @@ class Prometheus {
                     monitorResponseTime.set(this.monitorLabelValues, -1);
                 }
             } catch (e) {
-                log.error("prometheus", "Caught error");
+                log.error("prometheus", "捕获错误");
                 log.error("prometheus", e);
             }
         }

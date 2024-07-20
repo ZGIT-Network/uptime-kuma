@@ -85,7 +85,7 @@ function apiAuthorizer(username, password, callback) {
         if (pass) {
             verifyAPIKey(password).then((valid) => {
                 if (!valid) {
-                    log.warn("api-auth", "Failed API auth attempt: invalid API Key");
+                    log.warn("api-auth", "API 身份验证尝试失败: 未知 API Key");
                 }
                 callback(null, valid);
                 // Only allow a set number of api requests per minute
@@ -93,7 +93,7 @@ function apiAuthorizer(username, password, callback) {
                 apiRateLimiter.removeTokens(1);
             });
         } else {
-            log.warn("api-auth", "Failed API auth attempt: rate limit exceeded");
+            log.warn("api-auth", "API身份验证尝试失败: 超出速率限制");
             callback(null, false);
         }
     });
@@ -114,12 +114,12 @@ function userAuthorizer(username, password, callback) {
                 callback(null, user != null);
 
                 if (user == null) {
-                    log.warn("basic-auth", "Failed basic auth attempt: invalid username/password");
+                    log.warn("basic-auth", "基本身份验证尝试失败: 未知用户名或密码");
                     loginRateLimiter.removeTokens(1);
                 }
             });
         } else {
-            log.warn("basic-auth", "Failed basic auth attempt: rate limit exceeded");
+            log.warn("basic-auth", "基本身份验证尝试失败: 超出速率限制");
             callback(null, false);
         }
     });

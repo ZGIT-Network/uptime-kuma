@@ -50,14 +50,14 @@ class EmbeddedMariaDB {
      */
     start() {
         if (this.childProcess) {
-            log.info("mariadb", "Already started");
+            log.info("mariadb", "已经启动");
             return;
         }
 
         this.initDB();
 
         this.running = true;
-        log.info("mariadb", "Starting Embedded MariaDB");
+        log.info("mariadb", "启动嵌入式 MariaDB");
         this.childProcess = childProcess.spawn(this.exec, [
             "--user=node",
             "--datadir=" + this.mariadbDataDir,
@@ -69,17 +69,17 @@ class EmbeddedMariaDB {
             this.running = false;
             this.childProcess = null;
             this.started = false;
-            log.info("mariadb", "Stopped Embedded MariaDB: " + code);
+            log.info("mariadb", "启动嵌入式 MariaDB: " + code);
 
             if (code !== 0) {
-                log.info("mariadb", "Try to restart Embedded MariaDB as it is not stopped by user");
+                log.info("mariadb", "尝试重启嵌入式 MariaDB,因为不是由用户手动停止的");
                 this.start();
             }
         });
 
         this.childProcess.on("error", (err) => {
             if (err.code === "ENOENT") {
-                log.error("mariadb", `Embedded MariaDB: ${this.exec} is not found`);
+                log.error("mariadb", `嵌入式 MariaDB: ${this.exec} 不存在`);
             } else {
                 log.error("mariadb", err);
             }
@@ -101,7 +101,7 @@ class EmbeddedMariaDB {
                     clearInterval(interval);
                     resolve();
                 } else {
-                    log.info("mariadb", "Waiting for Embedded MariaDB to start...");
+                    log.info("mariadb", "等待嵌入式 MariaDB 启动...");
                 }
             }, 1000);
         });
@@ -124,7 +124,7 @@ class EmbeddedMariaDB {
      */
     initDB() {
         if (!fs.existsSync(this.mariadbDataDir)) {
-            log.info("mariadb", `Embedded MariaDB: ${this.mariadbDataDir} is not found, create one now.`);
+            log.info("mariadb", `嵌入式 MariaDB: ${this.mariadbDataDir} 没找到,将创建一个.`);
             fs.mkdirSync(this.mariadbDataDir, {
                 recursive: true,
             });
@@ -139,12 +139,12 @@ class EmbeddedMariaDB {
                 log.error("mariadb", error);
                 return;
             } else {
-                log.info("mariadb", "Embedded MariaDB: mysql_install_db done:" + result.stdout.toString("utf-8"));
+                log.info("mariadb", "嵌入式 MariaDB: mysql_install_db done:" + result.stdout.toString("utf-8"));
             }
         }
 
         if (!fs.existsSync(this.runDir)) {
-            log.info("mariadb", `Embedded MariaDB: ${this.runDir} is not found, create one now.`);
+            log.info("mariadb", `嵌入式 MariaDB: ${this.runDir} 没找到,将创建一个.`);
             fs.mkdirSync(this.runDir, {
                 recursive: true,
             });
@@ -165,7 +165,7 @@ class EmbeddedMariaDB {
         let result = await connection.execute("CREATE DATABASE IF NOT EXISTS `kuma`");
         log.debug("mariadb", "CREATE DATABASE: " + JSON.stringify(result));
 
-        log.info("mariadb", "Embedded MariaDB is ready for connections");
+        log.info("mariadb", "嵌入式 MariaDB 已准备好连接");
         this.started = true;
     }
 

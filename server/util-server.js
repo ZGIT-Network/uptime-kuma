@@ -127,7 +127,7 @@ exports.ping = async (hostname, size = 56) => {
         return await exports.pingAsync(hostname, false, size);
     } catch (e) {
         // If the host cannot be resolved, try again with ipv6
-        log.debug("ping", "IPv6 error message: " + e.message);
+        log.debug("ping", "IPv6 错误信息: " + e.message);
 
         // As node-ping does not report a specific error for this, try again if it is an empty message with ipv6 no matter what.
         if (!e.message) {
@@ -190,7 +190,7 @@ exports.kafkaProducerAsync = function (brokers, topic, message, options = {}, sa
         let connectedToKafka = false;
 
         const timeoutID = setTimeout(() => {
-            log.debug("kafkaProducer", "KafkaProducer timeout triggered");
+            log.debug("kafkaProducer", "KafkaProducer 超时已触发");
             connectedToKafka = true;
             reject(new Error("Timeout"));
         }, interval * 1000 * 0.8);
@@ -364,7 +364,7 @@ exports.postgresQuery = function (connectionString, query) {
         const client = new Client(config);
 
         client.on("error", (error) => {
-            log.debug("postgres", "Error caught in the error event handler.");
+            log.debug("postgres", "错误事件处理程序中捕获错误.");
             reject(error);
         });
 
@@ -652,11 +652,11 @@ exports.checkCertificate = function (socket) {
     const info = socket.getPeerCertificate(true);
     const valid = socket.authorized || false;
 
-    log.debug("cert", "Parsing Certificate Info");
+    log.debug("cert", "解析证书信息");
     const parsedInfo = parseCertificateInfo(info);
 
     if (process.env.TIMELOGGER === "1") {
-        log.debug("monitor", "Cert Info Query Time: " + (dayjs().valueOf() - certInfoStartTime) + "ms");
+        log.debug("monitor", "证书查询时间: " + (dayjs().valueOf() - certInfoStartTime) + "ms");
     }
 
     return {
@@ -678,7 +678,7 @@ exports.checkStatusCode = function (status, acceptedCodes) {
 
     for (const codeRange of acceptedCodes) {
         if (typeof codeRange !== "string") {
-            log.error("monitor", `Accepted status code not a string. ${codeRange} is of type ${typeof codeRange}`);
+            log.error("monitor", `接受状态代码不是字符串. ${codeRange} 是一个类型为 ${typeof codeRange} 的数据`);
             continue;
         }
 
@@ -692,7 +692,7 @@ exports.checkStatusCode = function (status, acceptedCodes) {
                 return true;
             }
         } else {
-            log.error("monitor", `${codeRange} is not a valid status code range`);
+            log.error("monitor", `${codeRange} 不是有效的状态代码范围`);
             continue;
         }
     }
@@ -939,7 +939,7 @@ module.exports.grpcQuery = async (options) => {
         const serviceFQDN = fullServiceName.split(".");
         const serviceMethod = serviceFQDN.pop();
         const serviceMethodClientImpl = `/${serviceFQDN.slice(1).join(".")}/${serviceMethod}`;
-        log.debug("monitor", `gRPC method ${serviceMethodClientImpl}`);
+        log.debug("monitor", `gRPC 方法 ${serviceMethodClientImpl}`);
         client.makeUnaryRequest(
             serviceMethodClientImpl,
             arg => arg,
@@ -958,7 +958,7 @@ module.exports.grpcQuery = async (options) => {
                         data: ""
                     });
                 } else {
-                    log.debug("monitor:", `gRPC response: ${JSON.stringify(response)}`);
+                    log.debug("monitor:", `gRPC 回复: ${JSON.stringify(response)}`);
                     return resolve({
                         code: 1,
                         errorMessage: "",

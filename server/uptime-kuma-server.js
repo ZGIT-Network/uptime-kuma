@@ -84,17 +84,17 @@ class UptimeKumaServer {
         // Set default axios timeout to 5 minutes instead of infinity
         axios.defaults.timeout = 300 * 1000;
 
-        log.info("server", "Creating express and socket.io instance");
+        log.info("server", "创建 express 和 socket.io 实例");
         this.app = express();
         if (isSSL) {
-            log.info("server", "Server Type: HTTPS");
+            log.info("server", "服务器类型: HTTPS");
             this.httpServer = https.createServer({
                 key: fs.readFileSync(sslKey),
                 cert: fs.readFileSync(sslCert),
                 passphrase: sslKeyPassphrase,
             }, this.app);
         } else {
-            log.info("server", "Server Type: HTTP");
+            log.info("server", "服务器类型: HTTP");
             this.httpServer = http.createServer(this.app);
         }
 
@@ -103,7 +103,7 @@ class UptimeKumaServer {
         } catch (e) {
             // "dist/index.html" is not necessary for development
             if (process.env.NODE_ENV !== "development") {
-                log.error("server", "Error: Cannot find 'dist/index.html', did you install correctly?");
+                log.error("server", "错误: 无法找到 'dist/index.html', 是否已运行部署程序?\n请执行 `npm run setup`");
                 process.exit(1);
             }
         }
@@ -132,12 +132,12 @@ class UptimeKumaServer {
                 if (req._query) {
                     transport = req._query.transport;
                 } else {
-                    log.error("socket", "Ops!!! Cannot get transport type, assume that it is polling");
+                    log.error("socket", "坏了!!! 无法获取传输类型，假设它是轮询");
                     transport = "polling";
                 }
 
                 const clientIP = await this.getClientIPwithProxy(req.connection.remoteAddress, req.headers);
-                log.info("socket", `New ${transport} connection, IP = ${clientIP}`);
+                log.info("socket", `新的 ${transport} 链接, IP = ${clientIP}`);
 
                 // The following check is only for websocket connections, polling connections are already protected by CORS
                 if (transport === "polling") {
@@ -145,10 +145,10 @@ class UptimeKumaServer {
                 } else if (transport === "websocket") {
                     const bypass = process.env.UPTIME_KUMA_WS_ORIGIN_CHECK === "bypass";
                     if (bypass) {
-                        log.info("auth", "WebSocket origin check is bypassed");
+                        log.info("auth", "绕过 WebSocket 源IP检查");
                         callback(null, true);
                     } else if (!req.headers.origin) {
-                        log.info("auth", "WebSocket with no origin is allowed");
+                        log.info("auth", "WebSocket 无源IP头是被允许的");
                         callback(null, true);
                     } else {
                         let host = req.headers.host;
@@ -163,14 +163,14 @@ class UptimeKumaServer {
 
                             if (host !== originURL.host && xForwardedFor !== originURL.host) {
                                 callback(null, false);
-                                log.error("auth", `Origin (${origin}) does not match host (${host}), IP: ${clientIP}`);
+                                log.error("auth", `源IP头 (${origin}) 与主机不匹配 (${host}), IP: ${clientIP}`);
                             } else {
                                 callback(null, true);
                             }
                         } catch (e) {
                             // Invalid origin url, probably not from browser
                             callback(null, false);
-                            log.error("auth", `Invalid origin url (${origin}), IP: ${clientIP}`);
+                            log.error("auth", `源 url 无效 (${origin}), IP: ${clientIP}`);
                         }
                     }
                 }
@@ -188,8 +188,8 @@ class UptimeKumaServer {
 
         process.env.TZ = await this.getTimezone();
         dayjs.tz.setDefault(process.env.TZ);
-        log.debug("DEBUG", "Timezone: " + process.env.TZ);
-        log.debug("DEBUG", "Current Time: " + dayjs.tz().format());
+        log.debug("DEBUG", "时区: " + process.env.TZ);
+        log.debug("DEBUG", "当前时间: " + dayjs.tz().format());
 
         await this.loadMaintenanceList();
     }
@@ -299,7 +299,7 @@ class UptimeKumaServer {
         });
 
         errorLogStream.on("error", () => {
-            log.info("", "Cannot write to error.log");
+            log.info("", "无法写入到 error.log");
         });
 
         if (errorLogStream) {
@@ -358,26 +358,26 @@ class UptimeKumaServer {
                 return process.env.TZ;
             }
         } catch (e) {
-            log.warn("timezone", e.message + " in process.env.TZ");
+            log.warn("timezone", e.message + " 位于 process.env.TZ");
         }
 
         let timezone = await Settings.get("serverTimezone");
 
         // From Settings
         try {
-            log.debug("timezone", "Using timezone from settings: " + timezone);
+            log.debug("timezone", "使用设置中的时区: " + timezone);
             if (timezone) {
                 this.checkTimezone(timezone);
                 return timezone;
             }
         } catch (e) {
-            log.warn("timezone", e.message + " in settings");
+            log.warn("timezone", e.message + " 在设置中");
         }
 
         // Guess
         try {
             let guess = dayjs.tz.guess();
-            log.debug("timezone", "Guessing timezone: " + guess);
+            log.debug("timezone", "猜测时区: " + guess);
             if (guess) {
                 this.checkTimezone(guess);
                 return guess;
@@ -386,7 +386,7 @@ class UptimeKumaServer {
             }
         } catch (e) {
             // Guess failed, fall back to UTC
-            log.debug("timezone", "Guessed an invalid timezone. Use UTC as fallback");
+            log.debug("timezone", "猜测时区无效。返回 UTC 时区");
             return "UTC";
         }
     }
@@ -457,10 +457,10 @@ class UptimeKumaServer {
     async startNSCDServices() {
         if (process.env.UPTIME_KUMA_IS_CONTAINER) {
             try {
-                log.info("services", "Starting nscd");
+                log.info("services", "启动 nscd");
                 await childProcessAsync.exec("sudo service nscd start");
             } catch (e) {
-                log.info("services", "Failed to start nscd");
+                log.info("services", "nscd 启动失败");
             }
         }
     }
@@ -472,10 +472,10 @@ class UptimeKumaServer {
     async stopNSCDServices() {
         if (process.env.UPTIME_KUMA_IS_CONTAINER) {
             try {
-                log.info("services", "Stopping nscd");
+                log.info("services", "正在停止 nscd");
                 await childProcessAsync.exec("sudo service nscd stop");
             } catch (e) {
-                log.info("services", "Failed to stop nscd");
+                log.info("services", "nscd 停止失败");
             }
         }
     }

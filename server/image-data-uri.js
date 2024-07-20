@@ -17,7 +17,7 @@ let ImageDataURI = (() => {
      */
     function decode(dataURI) {
         if (!/data:image\//.test(dataURI)) {
-            log.error("image-data-uri", "It seems that it is not an Image Data URI. Couldn't match \"data:image/\"");
+            log.error("image-data-uri", "他看起来不是一个图片数据. 没找到格式 \"data:image/\"");
             return null;
         }
 
@@ -38,7 +38,7 @@ let ImageDataURI = (() => {
      */
     function encode(data, mediaType) {
         if (!data || !mediaType) {
-            log.error("image-data-uri", "Missing some of the required params: data, mediaType");
+            log.error("image-data-uri", "缺少一些必需的参数: data, mediaType");
             return null;
         }
 

@@ -48,17 +48,17 @@ class SetupDatabase {
 
         try {
             dbConfig = Database.readDBConfig();
-            log.debug("setup-database", "db-config.json is found and is valid");
+            log.debug("setup-database", "db-config.json 已找到并且有效");
             this.needSetup = false;
 
         } catch (e) {
-            log.info("setup-database", "db-config.json is not found or invalid: " + e.message);
+            log.info("setup-database", "db-config.json 未找到或无效: " + e.message);
 
             // Check if kuma.db is found (1.X.X users), generate db-config.json
             if (fs.existsSync(path.join(Database.dataDir, "kuma.db"))) {
                 this.needSetup = false;
 
-                log.info("setup-database", "kuma.db is found, generate db-config.json");
+                log.info("setup-database", "kuma.db 已找到,将生成 db-config.json");
                 Database.writeDBConfig({
                     type: "sqlite",
                 });
@@ -70,7 +70,7 @@ class SetupDatabase {
 
         if (process.env.UPTIME_KUMA_DB_TYPE) {
             this.needSetup = false;
-            log.info("setup-database", "UPTIME_KUMA_DB_TYPE is provided by env, try to override db-config.json");
+            log.info("setup-database", "UPTIME_KUMA_DB_TYPE 由 env 提供, 尝试覆盖 db-config.json");
             dbConfig.type = process.env.UPTIME_KUMA_DB_TYPE;
             dbConfig.hostname = process.env.UPTIME_KUMA_DB_HOSTNAME;
             dbConfig.port = process.env.UPTIME_KUMA_DB_PORT;
@@ -231,10 +231,10 @@ class SetupDatabase {
                 });
 
                 // Shutdown down this express and start the main server
-                log.info("setup-database", "Database is configured, close the setup-database server and start the main server now.");
+                log.info("setup-database", "数据库已配置, 请关闭安装数据库服务器并立即启动主服务器.");
                 if (tempServer) {
                     tempServer.close(() => {
-                        log.info("setup-database", "The setup-database server is closed");
+                        log.info("setup-database", "setup-database 服务器已关闭");
                         resolve();
                     });
                 } else {
@@ -257,10 +257,10 @@ class SetupDatabase {
             });
 
             tempServer = app.listen(port, hostname, () => {
-                log.info("setup-database", `Starting Setup Database on ${port}`);
+                log.info("setup-database", `启动数据库初始化服务器于端口 ${port}`);
                 let domain = (hostname) ? hostname : "localhost";
-                log.info("setup-database", `Open http://${domain}:${port} in your browser`);
-                log.info("setup-database", "Waiting for user action...");
+                log.info("setup-database", `请在浏览器中打开 http://${domain}:${port}`);
+                log.info("setup-database", "等待用户操作...");
             });
         });
     }
