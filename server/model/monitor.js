@@ -1304,12 +1304,24 @@ class Monitor extends BeanModel {
 
             let text;
             if (bean.status === UP) {
-                text = "✅ Up";
+                text = "✅ 已恢复";
             } else {
-                text = "🔴 Down";
+                text = "🔴 异常/离线";
             }
 
-            let msg = `[${monitor.name}] [${text}] ${bean.msg}`;
+            function maskIPv4Address(str) {
+                if (!str) return "N/A";
+                const ipv4Regex = /(\d{1,3}\.){3}\d{1,3}(:\d{1,5})?/g;
+                return str.replace(ipv4Regex, (match) => {
+                    const ipv4Address = match.split(':')[0];
+                    const maskedAddress = ipv4Address.replace(/(\d{1,3}\.\d{1,3})$/, 'xxx.xxx');
+                    return maskedAddress;
+                });
+            }
+
+
+            let msg = `[${monitor.name}] \n${maskIPv4Address(bean.msg)} \n系统监测状态: [ ${text} ] \n时间戳: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`;
+
 
             for (let notification of notificationList) {
                 try {
